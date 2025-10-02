@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindScope Analytics - Mental Health Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Default Dark Theme */
+        :root {
+            --primary: #8A2BE2;
+            --secondary: #00BFFF;
+            --accent: #FF6B6B;
+            --dark-bg: #0e1117;
+            --card-bg: #1a1f25;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+            --critical: #ef4444;
+            --high: #f97316;
+            --medium: #eab308;
+            --low: #22c55e;
+        }
+        
+        /* Light Theme Variables */
+        .light-mode {
+            --primary: #6a1b9a;
+            --secondary: #0288d1;
+            --accent: #d32f2f;
+            --dark-bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --success: #388e3c;
+            --warning: #f57c00;
+            --danger: #d32f2f;
+            --info: #1976d2;
+            --critical: #d32f2f;
+            --high: #f57c00;
+            --medium: #f57c00;
+            --low: #388e3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-bg), var(--card-bg));
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        .light-mode body {
+            background: linear-gradient(135deg, var(--dark-bg), var(--card-bg));
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .light-mode .theme-toggle {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(138, 43, 226, 0.2);
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-section, .results-section {
+            background: rgba(26, 31, 37, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .light-mode .form-section, .light-mode .results-section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            color: var(--secondary);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(30, 35, 40, 0.7);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .light-mode input, .light-mode select {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(106, 27, 154, 0.3);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+        }
+        
+        .slider-container {
+            background: rgba(30, 35, 40, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .light-mode .slider-container {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .light-mode .slider {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(138, 43, 226, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: rgba(26, 31, 37, 0.7);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-mode .result-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .light-mode .result-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .condition-icon {
+            color: var(--primary);
+        }
+        
+        .stress-icon {
+            color: var(--warning);
+        }
+        
+        .severity-icon {
+            color: var(--danger);
+        }
+        
+        .result-title {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .result-detail {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            background: rgba(26, 31, 37, 0.7);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-mode .chart-container {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .light-mode .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .recommendations, .wellness-insights, .risk-scores {
+            background: rgba(26, 31, 37, 0.7);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-mode .recommendations, .light-mode .wellness-insights, .light-mode .risk-scores {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .recommendations h3, .wellness-insights h3, .risk-scores h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .recommendation-item, .insight-item {
+            background: rgba(30, 35, 40, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: transform 0.2s ease;
+        }
+        
+        .light-mode .recommendation-item, .light-mode .insight-item {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .recommendation-item:hover, .insight-item:hover {
+            transform: translateX(5px);
+            background: rgba(30, 35, 40, 0.7);
+        }
+        
+        .light-mode .recommendation-item:hover, .light-mode .insight-item:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .recommendation-icon, .insight-icon {
+            color: var(--info);
+            font-size: 1.5rem;
+            margin-top: 3px;
+        }
+        
+        .recommendation-content h4, .insight-content h4 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .recommendation-content p, .insight-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        
+        .priority-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--critical);
+        }
+        
+        .priority-high {
+            background: rgba(249, 115, 22, 0.2);
+            color: var(--high);
+        }
+        
+        .priority-medium {
+            background: rgba(234, 179, 8, 0.2);
+            color: var(--medium);
+        }
+        
+        .priority-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--low);
+        }
+        
+        .risk-score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .risk-score-card {
+            background: rgba(30, 35, 40, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .light-mode .risk-score-card {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .risk-score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .risk-score-low {
+            color: var(--low);
+        }
+        
+        .risk-score-medium {
+            color: var(--medium);
+        }
+        
+        .risk-score-high {
+            color: var(--high);
+        }
+        
+        .risk-score-critical {
+            color: var(--critical);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+        
+        .light-mode footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .error {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .light-mode .success-message {
+            background: rgba(74, 222, 128, 0.2);
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .analysis-id {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+        
+        .risk-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .risk-low {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+        }
+        
+        .risk-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+        }
+        
+        .risk-high {
+            background: rgba(248, 113, 113, 0.2);
+            color: var(--danger);
+        }
+        
+        .impact-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        
+        .impact-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--critical);
+        }
+        
+        .impact-medium {
+            background: rgba(234, 179, 8, 0.2);
+            color: var(--medium);
+        }
+        
+        .impact-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--low);
+        }
+        
+        .impact-critical {
+            background: rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h1>MindScope Analytics</h1>
+            <p class="subtitle">AI-Powered Mental Health Risk Assessment</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Personal Health Profile</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 25px;">Complete the form below to receive your personalized mental health assessment</p>
+                
+                <form id="healthForm">
+                    <div class="form-group">
+                        <label for="age">🎂 Age</label>
+                        <input type="range" id="age" name="age" class="slider" min="10" max="100" value="25">
+                        <div class="slider-label">
+                            <span>10</span>
+                            <span id="age-value">25</span>
+                            <span>100</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sleep_hours">😴 Sleep Hours (Daily)</label>
+                        <input type="range" id="sleep_hours" name="sleep_hours" class="slider" min="0" max="16" value="7" step="0.5">
+                        <div class="slider-label">
+                            <span>0</span>
+                            <span id="sleep_hours-value">7</span>
+                            <span>16</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="work_hours">💼 Work Hours (Weekly)</label>
+                        <input type="range" id="work_hours" name="work_hours" class="slider" min="0" max="120" value="40" step="1">
+                        <div class="slider-label">
+                            <span>0</span>
+                            <span id="work_hours-value">40</span>
+                            <span>120</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity_hours">🏃 Physical Activity Hours (Weekly)</label>
+                        <input type="range" id="activity_hours" name="activity_hours" class="slider" min="0" max="40" value="5" step="0.5">
+                        <div class="slider-label">
+                            <span>0</span>
+                            <span id="activity_hours-value">5</span>
+                            <span>40</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="social_media">📱 Social Media Usage (Daily)</label>
+                        <input type="range" id="social_media" name="social_media" class="slider" min="0" max="24" value="3" step="0.5">
+                        <div class="slider-label">
+                            <span>0</span>
+                            <span id="social_media-value">3</span>
+                            <span>24</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">👤 Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-Binary">Non-Binary</option>
+                            <option value="Prefer Not To Say">Prefer Not To Say</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="occupation">🏢 Occupation</label>
+                        <select id="occupation" name="occupation">
+                            <option value="IT">IT</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="country">🌍 Country</label>
+                        <select id="country" name="country">
+                            <option value="USA">USA</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultation">📝 Consultation History</label>
+                        <select id="consultation" name="consultation">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diet">🥗 Diet Quality</label>
+                        <select id="diet" name="diet">
+                            <option value="Healthy">Healthy</option>
+                            <option value="Average">Average</option>
+                            <option value="Unhealthy">Unhealthy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="smoking">🚬 Smoking Habit</label>
+                        <select id="smoking" name="smoking">
+                            <option value="Non-Smoker">Non-Smoker</option>
+                            <option value="Occasional Smoker">Occasional Smoker</option>
+                            <option value="Regular Smoker">Regular Smoker</option>
+                            <option value="Heavy Smoker">Heavy Smoker</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="alcohol">🍷 Alcohol Consumption</label>
+                        <select id="alcohol" name="alcohol">
+                            <option value="Non-Drinker">Non-Drinker</option>
+                            <option value="Occasional Drinker">Occasional Drinker</option>
+                            <option value="Regular Drinker">Regular Drinker</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="medication">💊 Medication Usage</label>
+                        <select id="medication" name="medication">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <i class="fas fa-brain"></i> Analyze My Mental Health
+                    </button>
+                </form>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Advanced Analysis Results</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your mental health profile with advanced AI algorithms...</p>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">
+                        <i class="fas fa-cogs"></i> Processing risk scores, wellness insights, and personalized recommendations
+                    </p>
+                </div>
+                
+                <div class="error" id="error">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                    <p id="error-message">An error occurred while processing your request.</p>
+                </div>
+                
+                <div id="results" class="hidden">
+                    <div class="success-message">
+                        <h3><i class="fas fa-check-circle"></i> Advanced Analysis Complete</h3>
+                        <p>Your comprehensive mental health assessment is ready</p>
+                    </div>
+                    
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <div class="result-icon condition-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="result-title">Condition</div>
+                            <div class="result-value" id="condition-value">--</div>
+                            <div class="result-detail" id="condition-risk">Risk Level: --</div>
+                            <div class="result-detail" id="condition-confidence">Confidence: --</div>
+                        </div>
+                        
+                        <div class="result-card">
+                            <div class="result-icon stress-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="result-title">Stress Level</div>
+                            <div class="result-value" id="stress-value">--</div>
+                            <div class="result-detail">Current stress level</div>
+                        </div>
+                        
+                        <div class="result-card">
+                            <div class="result-icon severity-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="result-title">Severity</div>
+                            <div class="result-value" id="severity-value">--</div>
+                            <div class="result-detail">Condition severity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Condition Probabilities</h3>
+                        <canvas id="conditionChart"></canvas>
+                    </div>
+                    
+                    <div class="risk-scores">
+                        <h3><i class="fas fa-ruler-combined"></i> Risk Assessment Scores</h3>
+                        <div class="risk-score-grid" id="risk-scores-container">
+                            <!-- Risk scores will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="wellness-insights">
+                        <h3><i class="fas fa-lightbulb"></i> Deep Wellness Insights</h3>
+                        <div id="wellness-insights-list">
+                            <!-- Wellness insights will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="recommendations">
+                        <h3><i class="fas fa-tasks"></i> Personalized Action Plan</h3>
+                        <div id="recommendations-list">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="timestamp" id="analysis-timestamp">
+                        <!-- Timestamp will be populated here -->
+                    </div>
+                    
+                    <div class="analysis-id" id="analysis-id">
+                        <!-- Analysis ID will be populated here -->
+                    </div>
+                    
+                    <div class="download-section" style="text-align: center; margin-top: 20px;">
+                        <button id="download-report" class="btn" style="width: auto; padding: 12px 25px;">
+                            <i class="fas fa-download"></i> Download Detailed Report
+                        </button>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px;">
+                            Download a PDF with Deep Wellness Insights and Personalized Action Plan
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>MindScope Analytics &copy; 2023 | Advanced Mental Health Prediction System</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">
+                <i class="fas fa-shield-alt"></i> Your data is processed securely and never stored
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+        
+        // Check for saved theme preference or respect OS preference
+        const savedTheme = localStorage.getItem('theme');
+        const osPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'light' || (!savedTheme && !osPrefersDark)) {
+            body.classList.add('light-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            
+            if (body.classList.contains('light-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Slider value display
+        const sliders = document.querySelectorAll('.slider');
+        sliders.forEach(slider => {
+            const valueDisplay = document.getElementById(`${slider.id}-value`);
+            valueDisplay.textContent = slider.value;
+            
+            slider.addEventListener('input', () => {
+                valueDisplay.textContent = slider.value;
+            });
+        });
+        
+        // Form submission
+        document.getElementById('healthForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const error = document.getElementById('error');
+            
+            // Hide previous results and show loading
+            results.classList.add('hidden');
+            error.classList.add('hidden');
+            loading.style.display = 'block';
+            
+            // Collect form data
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Hide loading and show results
+                    loading.style.display = 'none';
+                    results.classList.remove('hidden');
+                    
+                    // Update results
+                    document.getElementById('condition-value').textContent = result.condition;
+                    document.getElementById('condition-risk').innerHTML = `Risk Level: <span class="risk-${result.condition_risk.toLowerCase().replace(/\s+/g, '-')}">${result.condition_risk}</span>`;
+                    document.getElementById('condition-confidence').textContent = `Confidence: ${(result.condition_confidence * 100).toFixed(1)}%`;
+                    
+                    document.getElementById('stress-value').textContent = result.stress_level;
+                    document.getElementById('severity-value').textContent = result.severity;
+                    
+                    // Update timestamp
+                    document.getElementById('analysis-timestamp').innerHTML = `<i class="fas fa-clock"></i> Analysis completed on ${result.timestamp}`;
+                    document.getElementById('analysis-id').textContent = `Analysis ID: ${result.analysis_id}`;
+                    
+                    // Update condition chart
+                    updateConditionChart(result.condition_probabilities);
+                    
+                    // Update risk scores
+                    updateRiskScores(result.risk_scores);
+                    
+                    // Update wellness insights
+                    updateWellnessInsights(result.wellness_insights);
+                    
+                    // Update recommendations
+                    updateRecommendations(result.recommendations);
+                    
+                    // Store the analysis results for report generation
+                    window.analysisResults = result;
+                } else {
+                    throw new Error(result.error || 'An error occurred during analysis');
+                }
+            } catch (err) {
+                // Hide loading and show error
+                loading.style.display = 'none';
+                error.classList.remove('hidden');
+                document.getElementById('error-message').textContent = err.message;
+            }
+        });
+        
+        // Report download functionality
+        document.getElementById('download-report').addEventListener('click', async function() {
+            if (!window.analysisResults) {
+                alert('Please complete an analysis first');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/generate_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(window.analysisResults)
+                });
+                
+                if (response.ok) {
+                    // Create a blob from the response
+                    const blob = await response.blob();
+                    
+                    // Create a download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `mental_health_report_${window.analysisResults.analysis_id}.pdf`;
+                    
+                    // Trigger the download
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Clean up
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to generate report');
+                }
+            } catch (err) {
+                console.error('Error downloading report:', err);
+                alert('Error downloading report: ' + err.message);
+            }
+        });
+        
+        // Chart.js functionality
+        let conditionChart;
+        
+        function updateConditionChart(probabilities) {
+            const ctx = document.getElementById('conditionChart').getContext('2d');
+            
+            if (conditionChart) {
+                conditionChart.destroy();
+            }
+            
+            conditionChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(probabilities),
+                    datasets: [{
+                        data: Object.values(probabilities).map(p => Math.round(p * 1000) / 10),
+                        backgroundColor: [
+                            'rgba(138, 43, 226, 0.7)',
+                            'rgba(0, 191, 255, 0.7)',
+                            'rgba(255, 107, 107, 0.7)',
+                            'rgba(74, 222, 128, 0.7)',
+                            'rgba(251, 191, 36, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(138, 43, 226, 1)',
+                            'rgba(0, 191, 255, 1)',
+                            'rgba(255, 107, 107, 1)',
+                            'rgba(74, 222, 128, 1)',
+                            'rgba(251, 191, 36, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${Math.round(context.parsed * 100) / 100}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateRiskScores(riskScores) {
+            const container = document.getElementById('risk-scores-container');
+            container.innerHTML = '';
+            
+            for (const [key, score] of Object.entries(riskScores)) {
+                const card = document.createElement('div');
+                card.className = 'risk-score-card';
+                
+                let riskClass = 'risk-score-low';
+                if (score >= 75) riskClass = 'risk-score-critical';
+                else if (score >= 50) riskClass = 'risk-score-high';
+                else if (score >= 25) riskClass = 'risk-score-medium';
+                
+                card.innerHTML = `
+                    <div class="result-title">${key.replace(/_/g, ' ')}</div>
+                    <div class="risk-score-value ${riskClass}">${score}</div>
+                    <div class="result-detail">Risk Score (0-100)</div>
+                `;
+                
+                container.appendChild(card);
+            }
+        }
+        
+        function updateWellnessInsights(insights) {
+            const container = document.getElementById('wellness-insights-list');
+            container.innerHTML = '';
+            
+            insights.forEach(insight => {
+                const item = document.createElement('div');
+                item.className = 'insight-item';
+                
+                let impactBadge = '';
+                if (insight.impact === 'High') impactBadge = '<span class="impact-badge impact-high">High Impact</span>';
+                else if (insight.impact === 'Medium') impactBadge = '<span class="impact-badge impact-medium">Medium Impact</span>';
+                else if (insight.impact === 'Low') impactBadge = '<span class="impact-badge impact-low">Low Impact</span>';
+                else if (insight.impact === 'Critical') impactBadge = '<span class="impact-badge impact-critical">Critical</span>';
+                
+                item.innerHTML = `
+                    <div class="insight-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>${insight.title} ${impactBadge}</h4>
+                        <p>${insight.description}</p>
+                        <p><strong>Suggestion:</strong> ${insight.suggestion}</p>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function updateRecommendations(recommendations) {
+            const container = document.getElementById('recommendations-list');
+            container.innerHTML = '';
+            
+            recommendations.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                
+                let priorityBadge = '';
+                if (rec.priority === 'Critical') priorityBadge = '<span class="priority-badge priority-critical">Critical</span>';
+                else if (rec.priority === 'High') priorityBadge = '<span class="priority-badge priority-high">High</span>';
+                else if (rec.priority === 'Medium') priorityBadge = '<span class="priority-badge priority-medium">Medium</span>';
+                else if (rec.priority === 'Low') priorityBadge = '<span class="priority-badge priority-low">Low</span>';
+                
+                item.innerHTML = `
+                    <div class="recommendation-icon">
+                        <i class="${rec.icon}"></i>
+                    </div>
+                    <div class="recommendation-content">
+                        <h4>${rec.title} ${priorityBadge}</h4>
+                        <p>${rec.description}</p>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
