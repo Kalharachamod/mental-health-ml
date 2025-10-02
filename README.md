@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # 🧠 Mental Health Risk Prediction & Assessment System
 
 End-to-end ML + Streamlit project:
@@ -14,4 +14,4 @@ pip install -r requirements.txt
 =======
 # mental-health-ml
 An advanced machine learning system for predicting mental health conditions, stress levels, and severity, featuring automated preprocessing, multi-algorithm evaluation, and an interactive web interface
->>>>>>> 3656702a12a5b107b70e6777fc3db425d6c7bea6
+
